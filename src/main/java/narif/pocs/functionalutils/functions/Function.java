@@ -1,5 +1,12 @@
-package narif.poc.functionalutils.functions;
+package narif.pocs.functionalutils.functions;
 
+/**
+ * @author Najeeb
+ *
+ * @param <T>
+ * @param <U>
+ */
+@FunctionalInterface
 public interface Function<T, U> {
 
     U apply(T arg);

@@ -1,4 +1,4 @@
-package narif.poc.functionalutils.datastructures;
+package narif.pocs.functionalutils.constructs;
 
 public class  Tuple<T, V> {
 
