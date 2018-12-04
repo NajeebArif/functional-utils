@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test;
 
 import narif.pocs.functionalutils.common.CollectionUtils;
 import narif.pocs.functionalutils.functions.Function;
+
+import static narif.pocs.functionalutils.common.CollectionUtils.*;
+
 /**
  * @author Najeeb
  *
@@ -81,6 +84,39 @@ public class CollectionUtilsTest {
 	public void testAppend() {
 		List<Integer> appendedList = append(li, 6);
 		assertThat(appendedList).isNotNull().isNotEmpty().hasSize(6).endsWith(6);
+	}
+	
+	@Test
+	public void testFold() {
+		Integer result = foldLeft(li, 0, x->y-> x+y);
+		assertThat(result).isGreaterThan(0).isEqualTo(15);
+	}
+	
+	@Test
+	@DisplayName("left fold should result")
+	public void testLeftFold() {
+		final String leftFoldResult = "(((((0 + 1) + 2) + 3) + 4) + 5)";
+		String identity = "0";
+		Function<String, Function<Integer, String>> fn = x-> y-> "("+x+" + "+y+")";
+		String result = foldLeft(li, identity, fn);
+		assertThat(result).isNotNull().isNotEmpty().isEqualTo(leftFoldResult);
+	}
+	
+	@Test
+	@DisplayName("foldRight should result (1 + (2 + (3 + (4 + (5 + 0)))))")
+	public void testFoldRight() {
+		final String foldRightResult = "(1 + (2 + (3 + (4 + (5 + 0)))))";
+		String identity = "0";
+		Function<Integer, Function<String, String>> fn = x-> y-> "("+x+" + "+y+")";
+		String result = foldRight(li, identity, fn);
+		assertThat(result).isNotNull().isNotEmpty().isEqualTo(foldRightResult);
+	}
+	
+	@Test
+	@DisplayName("prepend to a list can be accomplished by using foldLeft")
+	public void testPrepend() {
+		List<Integer> result = prepend(0, li);
+		assertThat(result).isNotNull().isNotEmpty().hasSize(6).startsWith(0);
 	}
 
 }
