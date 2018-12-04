@@ -48,11 +48,13 @@ public class CaseTest {
 		final String EMAIL_PATTERN_STRING = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$";
 		final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_PATTERN_STRING);
 
-//		Effect<String> successEffect = s -> LOG.info("Email Sent to: " + s);
-//		Effect<String> failureEffect = s -> LOG.error("Error Message Logged for invalid email: " + s);
+		Effect<String> successEffect = s -> LOG.info("Email Sent to: " + s);
+		Effect<String> failureEffect = s -> LOG.error("Error Message Logged for invalid email: " + s);
 		
-		Effect<String> successEffect = s -> System.out.println("Email Sent to: " + s);
-		Effect<String> failureEffect = s -> System.err.println("Error Message Logged for invalid email: " + s);
+		/* Use SOPs instead of Logger to have some fun :-)
+		 * Effect<String> successEffect = s -> System.out.println("Email Sent to: " + s);
+		 * Effect<String> failureEffect = s -> System.err.println("Error Message Logged for invalid email: " + s); 
+		*/
 
 
 		Function<String, Result<String>> emailChecker = s -> Case.match(
