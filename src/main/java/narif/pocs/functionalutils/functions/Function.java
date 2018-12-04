@@ -7,7 +7,7 @@ package narif.pocs.functionalutils.functions;
  * @param <U>
  */
 @FunctionalInterface
-public interface Function<T, U> {
+public interface Function<T, U> extends java.util.function.Function<T, U>{
 
     U apply(T arg);
 
