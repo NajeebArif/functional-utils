@@ -87,10 +87,19 @@ public class CollectionUtils {
 	 * @return left folded value
 	 */
 	public static <T, U> U foldLeft(List<T> list, U identity, Function<U, Function<T,U>> fn) {
-		U result = identity;
-		for(T t: list)
-			result = fn.apply(result).apply(t);
-		return result;
+		return foldLeft_(list, identity, fn).eval();
+	}
+	
+	/**
+	 * Stack Safe foldLeft helper method using TCE
+	 * @param ts
+	 * @param identity
+	 * @param f
+	 * @return
+	 */
+	private static <T,U> TailCall<U> foldLeft_(List<T> ts, U identity, Function<U, Function<T,U>> f){
+		return ts.isEmpty()
+				? TailCall.ret(identity): TailCall.sus(()->foldLeft_(tail(ts), f.apply(identity).apply(head(ts)), f));
 	}
 	
 	/**
@@ -102,20 +111,15 @@ public class CollectionUtils {
 	 * @return
 	 */
 	public static <T, U> U foldRight(List<T> list, U identity, Function<T, Function<U, U>> fn) {
-		U result = identity;
-		for(int i = list.size(); i >0; i--)
-			result = fn.apply(list.get(i-1)).apply(result);
-		return result;
+		return foldRight_(identity, reverse(list), fn).eval();
 	}
 	
-	public static <T, U> U naiveUnsafeFoldRight(List<T> ts, U identity, Function<T, Function<U, U>> fn) {
-		//TODO: make this recursion heap based rather than stack based(thus the name)
-		return ts.isEmpty()
-				? identity
-						: fn.apply(head(ts)).apply(naiveUnsafeFoldRight(tail(ts), identity, fn));
+	private static <T,U> TailCall<U> foldRight_(U acc, List<T> ls, Function<T, Function<U,U>> f){
+		return ls.isEmpty()?
+				TailCall.ret(acc):
+					TailCall.sus(()-> foldRight_(f.apply(head(ls)).apply(acc), tail(ls), f));
 	}
 	
-	//TODO: too bad!! never do this. Use a stack instead.
 	public static <T> List<T> reverse(List<T> ts){
 		List<T> result = new ArrayList<>();
 		for(int i = ts.size()-1; i>=0; i--)
@@ -123,19 +127,16 @@ public class CollectionUtils {
 		return Collections.unmodifiableList(result);
 	}
 	
-	//TODO: too slow. too many iterations
 	public static <T> List<T> reverseFoldLeftAndPrepend(List<T> ts){
 		return foldLeft(ts, list(), l->i-> prepend(i,l));
 	}
 	
-	//TODO: too slow. too many iterations
 	public static <T> List<T> reverseFoldLeftAndAppend(List<T> ts){
 		return foldLeft(ts, list(), l -> i -> (
 					foldLeft(l, list(i), x-> y-> append(x,y))
 				));
 	}
-	
-	//TODO: too slow. too many iterations
+
 	public static <T> List<T> prepend(T t, List<T> list){
 		return foldLeft(list, list(t), x->y->append(x,y));
 	}
@@ -151,12 +152,10 @@ public class CollectionUtils {
 		return result;
 	}
 	
-	//TODO: remove from here or find something efficient 
 	public static <T, U> List<U> mapViaFoldLeft(List<T> ts, Function<T, U> fn){
 		return foldLeft(ts, list(), x-> y-> append(x, fn.apply(y)));
 	}
 	
-	//TODO: remove from here or find something efficient 
 	public static <T, U> List<U> mapViaFoldRight(List<T> ts, Function<T, U> fn){
 		return foldRight(ts, list(), x-> y-> prepend(fn.apply(x), y));
 	}
@@ -175,8 +174,19 @@ public class CollectionUtils {
 		return result;
 	}
 	
+	/**
+	 * Recursive stack safe range
+	 * @param start
+	 * @param end
+	 * @return
+	 */
 	public static List<Integer> range(int start, int end){
-		return unfold(start, x-> x + 1, x-> x < end);
+		return range_(list(),start,end).eval();
+	}
+	
+	private static TailCall<List<Integer>> range_(List<Integer> acc, Integer start, Integer end){
+		return end<=start
+				? TailCall.ret(acc) : TailCall.sus(()-> range_(append(acc, start), start+1, end));
 	}
 
 }
