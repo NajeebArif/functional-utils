@@ -1,5 +1,7 @@
 package narif.pocs.functionalutils.functions;
 
+import java.util.List;
+
 /**
  * @author Najeeb
  *
@@ -48,5 +50,5 @@ public interface Function<T, U> extends java.util.function.Function<T, U>{
     static <T, U, V> Function<Function<U, V>, Function<Function<T, U>, Function<T, V>>> higherCompose(){
         return (Function<U, V> x) -> (Function<T, U> y) -> (T z) -> x.apply(y.apply(z));
     }
-
+    
 }
